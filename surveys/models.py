@@ -29,10 +29,13 @@ class Feedback(models.Model):
     range_upper = models.IntegerField()
     range_lower = models.IntegerField()
 
+    def __str__(self) -> str:
+        return self.text
+
 class Score(models.Model):
     # Fields
     value = models.IntegerField()
-    submitted = models.DateTimeField(auto_created=True)
+    submitted = models.DateTimeField(auto_now_add=True)
 
     # Relations
     user = models.ForeignKey(User, on_delete=models.CASCADE)
