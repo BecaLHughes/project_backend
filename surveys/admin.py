@@ -16,10 +16,10 @@ class QuestionAdmin(admin.ModelAdmin):
     list_display = ('id', 'text', )
 
 class FeedbackAdmin(admin.ModelAdmin):
-    list_display = ('id', 'text', )
+    list_display = ('id', 'text', 'range_lower', 'range_upper')
 
 class ScoreAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'user', 'submitted', 'value', 'survey', 'feedback', )
 
 admin.site.register(Survey, SurveyAdmin)
 admin.site.register(Question, QuestionAdmin)
