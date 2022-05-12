@@ -2,10 +2,10 @@
 from django.urls import path
 
 # Local
-from .views import Survey, Feedback
+from .views import SurveyDetailView, SurveyResponseView
 
 # -------------
 urlpatterns = [
-    path('surveys/', Survey.as_view()),
-    path('feedback/', Feedback.as_view())
+    path('<int:survey_id>', SurveyDetailView.as_view()),
+    path('<int:survey_id>/responses/', SurveyResponseView.as_view())
 ]
