@@ -2,7 +2,7 @@
 import math
 
 # Django
-from django.shortcuts import render
+from django.utils import timezone
 
 # Rest
 from rest_framework.views import APIView
@@ -15,22 +15,14 @@ from .models import Feedback, Survey, Score
 from .serializers import SurveySerializer, SurveyResponseSerializer, ScoreSerialiser
 
 #--------------------------
-class SurveyMixinView(APIView):
-
-    def get_survey(self, survey_id):
-        # Checking if survery with id exits
-        survey = Survey.objects.filter(id=survey_id).first()
-        if survey is None:
-            return Response({'message': f'Survey with id {survey_id} does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
-        return survey
-
-class SurveyDetailView(SurveyMixinView):
+class SurveyDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, survey_id):
         # Checking if survery with id exits
-        survey = self.get_survey(survey_id)
+        survey = Survey.objects.filter(id=survey_id).first()
+        if survey is None:
+            return Response({'message': f'Survey with id {survey_id} does not exit'}, status=status.HTTP_404_NOT_FOUND)
 
         # Serialising survey data
         serialiser = SurveySerializer(survey)
@@ -39,12 +31,31 @@ class SurveyDetailView(SurveyMixinView):
 class SurveyResponseView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def _create_or_update_score(self, request, survey, feedback, value):
+        today = timezone.now().date()
+        score = Score.objects.filter(survey=survey, user=request.user, submitted=today).first()
+        if score is None:
+            # Create a new score instance
+            score = Score(value=value, survey=survey, feedback=feedback, user=request.user)
+            score.save()
+        else: 
+            # Update the score value and feedback
+            score.value = value
+            score.feedback = feedback
+            score.save()
+        return score
+
     def get(self, request, survey_id):
         # Checking if survery with id exits
         survey = Survey.objects.filter(id=survey_id).first()
         if survey is None:
             return Response({'message': f'Survey with id {survey_id} does not exit'}, status=status.HTTP_404_NOT_FOUND)
-        return Response({})
+
+        # Get all scores for user and survey, ordered by date
+        scores = Score.objects.filter(survey=survey, user=request.user)
+        scores = scores.order_by('submitted')
+        serializer = ScoreSerialiser(scores, many=True)
+        return Response(serializer.data)
 
     def post(self, request, survey_id):
         # Checking if survery with id exits
@@ -74,8 +85,6 @@ class SurveyResponseView(APIView):
         feedback = Feedback.objects.filter(range_lower__lte=score_integer, range_upper__gte=score_integer).first()
         
         # Create a score
-        score = Score(value=score_integer, survey=survey, feedback=feedback, user=request.user)
-        score.save()
+        score = self._create_or_update_score(request, survey, feedback, score_integer)
         score_serializer = ScoreSerialiser(score)
-
         return Response(score_serializer.data)
