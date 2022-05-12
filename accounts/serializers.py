@@ -21,3 +21,8 @@ class SignupSerializer(serializers.ModelSerializer):
         password = make_password(validated_data['password'])
         validated_data['password'] = password
         return super().create(validated_data)
+
+class UserProfileSerializer(serializers.ModelSerializer):
+     class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', ]
