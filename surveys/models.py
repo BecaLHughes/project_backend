@@ -35,7 +35,7 @@ class Feedback(models.Model):
 class Score(models.Model):
     # Fields
     value = models.IntegerField()
-    submitted = models.DateTimeField(auto_now_add=True)
+    submitted = models.DateField(auto_now_add=True)
 
     # Relations
     user = models.ForeignKey(User, on_delete=models.CASCADE)
