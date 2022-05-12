@@ -1,4 +1,5 @@
 # Django
+from urllib import response
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
@@ -10,10 +11,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 # Local
-from .serializers import LoginSerialiser, SignupSerializer
+from .serializers import LoginSerialiser, SignupSerializer, UserProfileSerializer
 
 # -----------------------
-class UserLogin(APIView):
+class UserLoginView(APIView):
     def post(self, request):
         serializer = LoginSerialiser(data=request.data)
         if not serializer.is_valid():
@@ -27,14 +28,14 @@ class UserLogin(APIView):
         token, _ = Token.objects.get_or_create(user=user)
         return Response({'token': token.key})
 
-class UserLogout(APIView):
+class UserLogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request):
         Token.objects.get(user=request.user).delete()
         return Response()
 
-class UserSignup(APIView):
+class UserSignupView(APIView):
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
         if not serializer.is_valid():
@@ -43,3 +44,25 @@ class UserSignup(APIView):
         user = serializer.save()
         token, _ = Token.objects.get_or_create(user=user)
         return Response({'token': token.key})
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data)
+
+    def put(self, request):
+        serializer = UserProfileSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update user details
+        serializer.update(request.user, serializer.validated_data)
+        return Response(serializer.data)
+
+    def delete(self, request):
+        # Delete user
+        user = request.user
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
