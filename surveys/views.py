@@ -22,7 +22,7 @@ class SurveyDetailView(APIView):
         # Checking if survery with id exits
         survey = Survey.objects.filter(id=survey_id).first()
         if survey is None:
-            return Response({'message': f'Survey with id {survey_id} does not exit'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': f'Survey with id {survey_id} does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
         # Serialising survey data
         serialiser = SurveySerializer(survey)
@@ -49,7 +49,7 @@ class SurveyResponseView(APIView):
         # Checking if survery with id exits
         survey = Survey.objects.filter(id=survey_id).first()
         if survey is None:
-            return Response({'message': f'Survey with id {survey_id} does not exit'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': f'Survey with id {survey_id} does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
         # Get all scores for user and survey, ordered by date
         scores = Score.objects.filter(survey=survey, user=request.user)

@@ -25,8 +25,7 @@ SECRET_KEY = 'django-insecure-8$#n*h*h-fbqg!dmujw2$xer@biobr03%5(7fig-gw380gl%d(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', ]
-
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost:8080', '8080' ]
 
 # Application definition
 
@@ -48,9 +47,11 @@ INSTALLED_APPS = [
     'surveys',
 
     # Third party
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -145,3 +146,13 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',  
     ],
 }
+
+# CORS SETTINGS
+CORS_ALLOW_ALL_ORIGINS = True # If this is used then `CORS_ALLOWED_ORIGINS` will not have any effect
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8080',
+] # If this is used, then not need to use `CORS_ALLOW_ALL_ORIGINS = True`
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    'http://localhost:8080',
+]
